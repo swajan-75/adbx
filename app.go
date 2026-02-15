@@ -50,12 +50,12 @@ func (a *App) DeleteRecent(id int) error {
     _, err := db.Exec("DELETE FROM recent WHERE id = ?", id)
     return err
 }
-// Device struct for the frontend
+
 type Device struct {
 	ID string `json:"id"`
 }
 
-// GetDevices scans for connected Android devices
+
 func (a *App) GetDevices() []Device {
 	cmd := exec.Command("adb", "devices")
 	var out bytes.Buffer
@@ -87,28 +87,26 @@ func (a *App) TogglePause(deviceID string) {
 	exec.Command("adb", "-s", deviceID, "shell", "input", "keyevent", "85").Run()
 }
 
-// FastForward sends the fast-forward keyevent
+
 func (a *App) FastForward(deviceID string) {
 	exec.Command("adb", "-s", deviceID, "shell", "input", "keyevent", "90").Run()
 }
 
-// Rewind sends the rewind keyevent
+
 func (a *App) Rewind(deviceID string) {
 	exec.Command("adb", "-s", deviceID, "shell", "input", "keyevent", "89").Run()
 }
-// Inside your Go App struct
+
 func (a *App) StartStatusMonitor() {
     go func() {
         for {
-            // 1. Run ADB command to get VLC position
-            // Example command: adb shell dumpsys media_session
-            // Or better: use VLC's RC interface if enabled
             
-            currTime := "00:10:00" // Replace with actual logic
-            totalTime := "01:30:00" // Replace with actual logic
-            percentage := 15.0      // (curr/total * 100)
+            
+            currTime := "00:10:00" 
+            totalTime := "01:30:00" 
+            percentage := 15.0      
 
-            // 2. Emit event to React
+    
             runtime.EventsEmit(a.ctx, "vlc_status", map[string]interface{}{
                 "curr": currTime,
                 "total": totalTime,
@@ -119,14 +117,14 @@ func (a *App) StartStatusMonitor() {
         }
     }()
 }
-// PlayVLC executes the force-stop and the specific Naruto stream intent
+
 func (a *App) PlayVLC(deviceID string, videoURL string) string {
-    // Sanity check for blank links
+   
     if strings.TrimSpace(videoURL) == "" {
         return "Error: URL cannot be blank"
     }
 
-    // 1. Force Stop & Start VLC
+    
     exec.Command("adb", "-s", deviceID, "shell", "am", "force-stop", "org.videolan.vlc").Run()
 
     args := []string{
@@ -143,7 +141,7 @@ func (a *App) PlayVLC(deviceID string, videoURL string) string {
         return fmt.Sprintf("Error: %s", err.Error())
     }
 
-    // 2. Log to Database ONLY if it's not a duplicate of the most recent entry
+   
     var lastURL string
     _ = db.QueryRow("SELECT url FROM recent ORDER BY id DESC LIMIT 1").Scan(&lastURL)
 
@@ -155,4 +153,11 @@ func (a *App) PlayVLC(deviceID string, videoURL string) string {
     }
 
     return "Success"
+}
+func (a *App) EmergencyKill() string {
+    err := exec.Command("adb", "kill-server").Run()
+    if err != nil {
+        return fmt.Sprintf("Error killing server: %s", err.Error())
+    }
+    return "ADB_TERMINATED"
 }

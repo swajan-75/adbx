@@ -10,6 +10,10 @@ export function DeleteRecent(arg1) {
   return window['go']['main']['App']['DeleteRecent'](arg1);
 }
 
+export function EmergencyKill() {
+  return window['go']['main']['App']['EmergencyKill']();
+}
+
 export function FastForward(arg1) {
   return window['go']['main']['App']['FastForward'](arg1);
 }

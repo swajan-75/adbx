@@ -6,6 +6,8 @@ export function AddDevice(arg1:string):Promise<Array<main.Device>>;
 
 export function DeleteRecent(arg1:number):Promise<void>;
 
+export function EmergencyKill():Promise<string>;
+
 export function FastForward(arg1:string):Promise<void>;
 
 export function GetDevices():Promise<Array<main.Device>>;

@@ -1,6 +1,4 @@
 import { useState, useEffect } from 'react';
-// Import only the toggle logic you might need (WindowMaximise, WindowMinimise)
-import { WindowMinimise, WindowToggleMaximise, Quit } from '../wailsjs/runtime';
 import {
     HiOutlineDeviceTablet, HiOutlinePlus, HiOutlineArrowPath,
     HiOutlineMagnifyingGlass, HiOutlineBell
@@ -14,7 +12,7 @@ import { IoMdCloseCircleOutline } from "react-icons/io";
 
 import {
     GetDevices, PlayVLC, TogglePause, FastForward, Rewind,
-    AddDevice, GetRecent, DeleteRecent, StartStatusMonitor
+    AddDevice, GetRecent, DeleteRecent, StartStatusMonitor, EmergencyKill
 } from '../wailsjs/go/main/App';
 
 function App() {
@@ -52,19 +50,19 @@ function App() {
     };
 
     useEffect(() => {
-    const { EventsOn } = window.runtime;
+        const { EventsOn } = window.runtime;
 
-    EventsOn("vlc_status", (data) => {
-        console.log("Backend Status:", data); // Check if data is coming through
-        setPlayback({
-            curr: data.curr || '00:00:00',
-            total: data.total || '00:00:00',
-            percent: data.percent || 0
+        EventsOn("vlc_status", (data) => {
+            console.log("Backend Status:", data);
+            setPlayback({
+                curr: data.curr || '00:00:00',
+                total: data.total || '00:00:00',
+                percent: data.percent || 0
+            });
         });
-    });
 
-    return () => window.runtime.EventsOff("vlc_status");
-}, []);
+        return () => window.runtime.EventsOff("vlc_status");
+    }, []);
 
     useEffect(() => {
         const initData = async () => {
@@ -82,15 +80,12 @@ function App() {
     return (
         <div className="relative h-screen w-screen bg-slate-900 text-slate-200 font-sans antialiased tracking-tight flex flex-col overflow-hidden">
 
-            {/* 1. TOPBAR - Locked at the very top for Dragging */}
-            {/* IMPORTANT: We removed the manual 3-dot buttons. macOS will inject them here automatically */}
+
             <header
                 style={{ "--wails-draggable": "drag" }}
                 className="drag-region relative z-[10] w-full h-10 flex items-center justify-between px-4 bg-white/5 backdrop-blur-md border-b border-white/10 shrink-0">
-                {/* This 80px space is RESERVED for the native macOS Traffic Lights */}
                 <div className="w-20 h-full"></div>
 
-                {/* Center title - select-none and pointer-events-none makes it "transparent" to dragging */}
                 <div className="absolute left-1/2 -translate-x-1/2 text-[10px] font-bold uppercase tracking-[0.3em] text-white/30 pointer-events-none select-none">
                     ABDx
                 </div>
@@ -103,14 +98,13 @@ function App() {
             </header>
 
 
-            {/* 2. BODY WRAPPER */}
             <div className="relative flex flex-1 overflow-hidden p-5 pt-2">
 
-                {/* DECORATIVE BACKGROUND BLOBS */}
+
                 <div className="absolute top-[-10%] left-[-10%] w-[700px] h-[700px] bg-blue-600/20 blur-[140px] rounded-full pointer-events-none z-0"></div>
                 <div className="absolute bottom-[-10%] right-[-5%] w-[600px] h-[600px] bg-purple-600/15 blur-[120px] rounded-full pointer-events-none z-0"></div>
 
-                {/* SIDEBAR */}
+
                 <aside className="relative z-10 w-64 h-full bg-white/10 backdrop-blur-[60px] rounded-[32px] shadow-2xl border border-white/10 p-8 flex flex-col shrink-0">
                     <div className="flex items-center gap-3 mb-10 px-2 shrink-0">
                         <div className="w-9 h-9 bg-blue-600 rounded-xl flex items-center justify-center text-white shadow-lg">
@@ -153,70 +147,43 @@ function App() {
                     </div>
                 </aside>
 
-                {/* MAIN CONTENT */}
+
                 <main className="relative z-10 flex-1 flex flex-col ml-6 h-full overflow-hidden">
                     <header className="flex justify-between items-center mb-8 px-2 shrink-0">
-                        <div className="relative w-full max-w-md">
-                            <input type="text" placeholder="Search history..." className="w-full bg-white/10 backdrop-blur-3xl border border-white/10 rounded-2xl py-3 pl-12 pr-4 text-sm text-white focus:outline-none focus:ring-4 focus:ring-blue-500/20 transition shadow-sm" />
-                            <HiOutlineMagnifyingGlass className="absolute left-4 top-3.5 text-slate-400 text-lg" />
-                        </div>
+
                     </header>
 
                     {/* PLAYER */}
-                    {/* PLAYER */}
-<section className="w-full max-w-2xl mx-auto flex flex-col items-center mb-10 shrink-0">
-    <div className="w-full bg-black/60 rounded-[48px] p-10 shadow-2xl border border-white/10 flex flex-col gap-8 backdrop-blur-[40px]">
-        
-        {/* PROGRESS AREA */}
-        <div className="space-y-3 px-2">
-            {/* REAL PROGRESS BAR */}
-            <div className="relative h-1.5 w-full bg-white/10 rounded-full overflow-hidden">
-                <div
-                    className="absolute h-full bg-white rounded-full shadow-[0_0_15px_rgba(255,255,255,0.6)] transition-all duration-1000 ease-linear"
-                    style={{ width: `${playback.percent}%` }}
-                ></div>
-            </div>
-            {/* REAL TIMES */}
-            <div className="flex justify-between text-[10px] font-semibold font-mono text-white/30 uppercase tracking-widest px-1">
-                <span>{playback.curr}</span>
-                <span>{playback.total}</span>
-            </div>
-        </div>
 
-        {/* CONTROLS AREA */}
-        <div className="flex items-center justify-between px-4">
-            <button className="text-white opacity-40 hover:opacity-100 transition-opacity text-2xl"><MdOutlineSettings /></button>
-            
-            <div className="flex items-center gap-10">
-                {/* REWIND */}
-                <button onClick={(e) => { e.stopPropagation(); Rewind(selectedID); }} className="text-white text-4xl hover:scale-110 active:scale-90 transition-transform">
-                    <MdFastRewind />
-                </button>
+                    <section className="w-full max-w-2xl mx-auto flex flex-col items-center mb-10 shrink-0">
+                        <div className="w-full bg-black/60 rounded-[48px] p-10 shadow-2xl border border-white/10 flex flex-col gap-8 backdrop-blur-[40px]">
+                            {/* CONTROLS AREA */}
+                            <div className="flex items-center justify-center px-4"> {/* Changed to justify-center */}
+                                <div className="flex items-center gap-10">
+                                    {/* REWIND */}
+                                    <button onClick={(e) => { e.stopPropagation(); Rewind(selectedID); }} className="text-white text-4xl hover:scale-110 active:scale-90 transition-transform">
+                                        <MdFastRewind />
+                                    </button>
 
-                {/* PLAY / PAUSE TOGGLE */}
-                <button
-                    onClick={(e) => {
-                        e.stopPropagation();
-                        // If streaming, toggle pause. If idle, launch current URL.
-                        status === 'Streaming' ? TogglePause(selectedID) : handleLaunch();
-                    }}
-                    className="w-20 h-20 bg-white text-black rounded-full flex items-center justify-center text-5xl shadow-xl hover:scale-105 active:scale-95 transition-all"
-                >
-                    {status === 'Streaming' ? <MdPause /> : <MdPlayArrow />}
-                </button>
+                                    {/* PLAY / PAUSE TOGGLE */}
+                                    <button
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            status === 'Streaming' ? TogglePause(selectedID) : handleLaunch();
+                                        }}
+                                        className="w-20 h-20 bg-white text-black rounded-full flex items-center justify-center text-5xl shadow-xl hover:scale-105 active:scale-95 transition-all"
+                                    >
+                                        {status === 'Streaming' ? <MdPause /> : <MdPlayArrow />}
+                                    </button>
 
-                {/* FAST FORWARD */}
-                <button onClick={(e) => { e.stopPropagation(); FastForward(selectedID); }} className="text-white text-4xl hover:scale-110 active:scale-90 transition-transform">
-                    <MdFastForward />
-                </button>
-            </div>
-
-            <button onClick={refreshRecent} className="text-white opacity-40 hover:opacity-100 transition-opacity text-2xl">
-                <HiOutlineArrowPath className={status === 'Refreshing...' ? 'animate-spin' : ''} />
-            </button>
-        </div>
-    </div>
-</section>
+                                    {/* FAST FORWARD */}
+                                    <button onClick={(e) => { e.stopPropagation(); FastForward(selectedID); }} className="text-white text-4xl hover:scale-110 active:scale-90 transition-transform">
+                                        <MdFastForward />
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
 
                     {/* TABLE */}
                     <section className="bg-white/10 backdrop-blur-[60px] rounded-[40px] border border-white/10 shadow-2xl flex-1 overflow-hidden flex flex-col min-h-0">
@@ -268,8 +235,17 @@ function App() {
                             </div>
                         </div>
                     </div>
-                    <button onClick={() => setStatus('TERMINATED')} className="w-full bg-red-600/20 text-red-400 py-5 rounded-[28px] font-bold uppercase text-[10px] tracking-[0.2em] border border-red-500/20 hover:bg-red-600 hover:text-white transition-all shadow-sm flex items-center justify-center gap-2 shrink-0">
-                        <IoMdCloseCircleOutline className="text-lg" /> Emergency Kill VLC
+                    <button
+                        onClick={() => {
+                            EmergencyKill().then((res) => {
+                                setStatus(res);      
+                                setDevices([]);      
+                                setSelectedID('');  
+                            });
+                        }}
+                        className="w-full bg-red-600/20 text-red-400 py-5 rounded-[28px] font-bold uppercase text-[10px] tracking-[0.2em] border border-red-500/20 hover:bg-red-600 hover:text-white transition-all shadow-sm flex items-center justify-center gap-2 shrink-0"
+                    >
+                        <IoMdCloseCircleOutline className="text-lg" /> Emergency Kill ADB
                     </button>
                 </aside>
             </div>
