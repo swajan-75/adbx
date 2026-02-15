@@ -7,6 +7,13 @@
 **ABDx** is a sophisticated desktop bridge designed to give you absolute control over Android media environments (Android TV, Tablets, and Phones) directly from your PC. Built with a focus on speed and "Glassmorphism" aesthetics, it transforms your desktop into a powerful remote command center for VLC.
 
 ---
+## 🖥️ Interface Preview
+
+<p align="center">
+  <img src="assets/demo.png" alt="ABDx Interface on macOS" width="800">
+</p>
+
+---
 
 ## **📋 Necessary Requirements**
 
